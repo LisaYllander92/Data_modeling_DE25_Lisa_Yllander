@@ -1,0 +1,27 @@
+services:
+  postgres:
+    image: postgres:latest
+    container_name: postgres
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports: # port mapping between host machine and container
+      - "${POSTGRES_PORT}:5432" # same as: "5432:5432"     
+      # postgresql default port: 5432
+    volumes: # distinguish between named volumes and bind mounts
+      - postgres_data:/var/lib/postgresql # named volume for persisting data
+      - ./sql:/sql # bind mount for persistng data 
+      # to the left of : - the current location in the sql map. On the right of : - creates a map called sql in docker container
+      # usage of bind mount (connecting the to maps called sql)
+
+    healthcheck: # define a check after the container is up running 
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"] # checks if the program can be opened
+      interval: 5s # retries after 5 sek
+      retries: 5 # number of retries
+      timeout: 3s # for each of the tries. If it doesn't work after 3 sek, it will try again 
+
+volumes: # named volume (which can be seen under the Volume section of the GUI)
+         # here is where named volume is vreated
+  postgres_data:
